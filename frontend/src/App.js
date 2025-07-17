@@ -589,7 +589,7 @@ function App() {
                     Broneerin...
                   </div>
                 ) : (
-                  "🌿 Broneeri Muruniitmine"
+                  "Broneeri Muruniitmine"
                 )}
               </button>
             </form>

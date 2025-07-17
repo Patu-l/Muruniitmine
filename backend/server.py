@@ -67,13 +67,19 @@ class AvailableTimesResponse(BaseModel):
     available_times: List[str]
     earliest_time: Optional[str]
 
-# Configuration - UPDATED WORKING HOURS
+# Configuration - WORKING DAYS: Monday to Friday
 BASE_PRICE_PER_HECTARE = 27.19  # Base price per hectare
 WORK_RATE = 0.4  # hectares per hour
 LOGISTICS_TIME = 1.5  # hours between jobs
 WORKDAY_START = time(8, 0)  # 8:00 AM
 WORKDAY_END = time(18, 0)  # 6:00 PM
 LONG_GRASS_PREMIUM = 0.25  # 25% extra for long grass
+WORKING_DAYS = [0, 1, 2, 3, 4]  # Monday to Friday (0=Monday, 6=Sunday)
+
+def is_working_day(date_str: str) -> bool:
+    """Check if the date is a working day (Monday to Friday)"""
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    return date_obj.weekday() in WORKING_DAYS
 
 def calculate_work_duration(area_hectares: float) -> float:
     """Calculate work duration in hours"""
@@ -129,6 +135,14 @@ async def get_bookings_for_date(date: str) -> List[Booking]:
 
 async def calculate_available_times(date: str, area_hectares: float = 1.0) -> AvailableTimesResponse:
     """Calculate available time slots for a given date and area"""
+    # Check if it's a working day
+    if not is_working_day(date):
+        return AvailableTimesResponse(
+            date=date,
+            available_times=[],
+            earliest_time=None
+        )
+    
     # Get existing bookings for the date
     bookings = await get_bookings_for_date(date)
     
@@ -219,6 +233,10 @@ async def create_booking(booking_data: BookingCreate):
     try:
         # Validate date format
         datetime.strptime(booking_data.date, '%Y-%m-%d')
+        
+        # Check if it's a working day
+        if not is_working_day(booking_data.date):
+            raise HTTPException(status_code=400, detail="Töötame ainult esmaspäevast reedeni")
         
         # Validate time format
         time_obj = datetime.strptime(booking_data.time, '%H:%M').time()

@@ -120,26 +120,43 @@ function App() {
     return today.toISOString().split('T')[0];
   };
 
+  const getNextWorkingDay = () => {
+    const today = new Date();
+    let nextDay = new Date(today);
+    
+    // Find next working day (Monday = 1, Friday = 5)
+    do {
+      nextDay.setDate(nextDay.getDate() + 1);
+    } while (nextDay.getDay() === 0 || nextDay.getDay() === 6); // Skip Saturday and Sunday
+    
+    return nextDay.toISOString().split('T')[0];
+  };
+
+  const isWorkingDay = (date) => {
+    const day = new Date(date).getDay();
+    return day >= 1 && day <= 5; // Monday to Friday
+  };
+
   const faqData = [
     {
       question: "Millal te töötate?",
-      answer: "Töötame esmaspäevast pühapäevani kell 8:00-18:00. Viimane broneering sõltub teie pindala suurusest - suurema pindala korral tuleb varem broneerida."
+      answer: "Töötame esmaspäevast reedeni kell 8:00-18:00. Nädalavahetustel me ei tööta."
     },
     {
-      question: "Kuidas hinda arvutatakse?",
-      answer: "Põhihind on 27,19€ hektari kohta. Pika rohi korral lisandub 25% lisatasu. Töö kestus arvutatakse nii: tunnid = pindala ÷ 0,4"
+      question: "Kas pakute garantiid?",
+      answer: "Jah, pakume 100% rahulolu garantiid. Kui te pole meie tööga rahul, tuleme tagasi ja teeme uuesti tasuta."
     },
     {
       question: "Miks mõned ajad pole saadaval?",
       answer: "Meie süsteem näitab ainult vabad aegu. Iga töö vahel lisame 1,5 tundi logistikaega, et jõuda järgmise kliendi juurde."
     },
     {
-      question: "Kas võin tühistada broneeringu?",
-      answer: "Jah, võite helistada meile vähemalt 24 tundi enne planeeritud tööd. Kontaktandmed saadetakse teile kinnituskiri."
+      question: "Kuidas toimub broneeringu tühistamine?",
+      answer: "24 tundi enne planeeritud tööd saate tühistada tasuta. Hilisema tühistamise korral tagastame 50% broneeringu summast."
     },
     {
       question: "Kas töötate ka vihma korral?",
-      answer: "Vihma korral lükkame töö edasi järgmisele sobivale päevale. Võtame teiega ühendust ilmaolude muutudes."
+      answer: "Vihma korral lükkame töö edasi järgmisele sobivale tööpäevale. Võtame teiega ühendust ilmaolude muutudes."
     }
   ];
 
@@ -147,7 +164,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-green-600 to-green-700 text-white py-20">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <div className="absolute inset-0 bg-black opacity-50"></div>
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -156,24 +173,27 @@ function App() {
           }}
         ></div>
         <div className="relative container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            🌿 Professionaalne Muruniitmine
-          </h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Kvaliteetne muruniitmisteenus kogu Eestis. Broneeri kiiresti ja mugavalt!
-          </p>
-          <div className="flex justify-center space-x-4">
-            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
-              <div className="text-2xl font-bold">8:00-18:00</div>
-              <div className="text-sm">Tööaeg</div>
-            </div>
-            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
-              <div className="text-2xl font-bold">27,19€</div>
-              <div className="text-sm">Hektari eest</div>
-            </div>
-            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4">
-              <div className="text-2xl font-bold">Kohe</div>
-              <div className="text-sm">Broneering</div>
+          <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl p-8 max-w-4xl mx-auto">
+            <h1 className="text-5xl font-bold mb-4 text-shadow-lg">
+              🌿 Professionaalne Muruniitmine
+            </h1>
+            <p className="text-xl mb-8 text-shadow-md">
+              Kvaliteetne muruniitmisteenus kogu Eestis<br />
+              Broneeri kiiresti ja mugavalt!
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 min-w-32">
+                <div className="text-2xl font-bold">E-R</div>
+                <div className="text-sm">8:00-18:00</div>
+              </div>
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 min-w-32">
+                <div className="text-2xl font-bold">27,19€</div>
+                <div className="text-sm">Hektari eest</div>
+              </div>
+              <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 min-w-32">
+                <div className="text-2xl font-bold">Kohe</div>
+                <div className="text-sm">Broneering</div>
+              </div>
             </div>
           </div>
         </div>
@@ -213,7 +233,7 @@ function App() {
                 }}
               ></div>
               <h3 className="text-xl font-semibold text-green-800 mb-2">✅ Garantiitud Kvaliteet</h3>
-              <p className="text-gray-600">Kõrgeim kvaliteet ja kliendile orienteeritud lähenemine</p>
+              <p className="text-gray-600">100% rahulolu garantii ja kliendile orienteeritud lähenemine</p>
             </div>
           </div>
 
@@ -250,7 +270,7 @@ function App() {
                   className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                 />
                 <label htmlFor="longGrass" className="text-sm font-medium text-gray-700">
-                  Pikk rohi (lisab 25% hinda)
+                  Pikk rohi <span className="text-gray-500">(üle 17cm, lisab 25% hinda)</span>
                 </label>
               </div>
 
@@ -278,45 +298,83 @@ function App() {
               {/* Date Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kuupäev *
+                  Kuupäev * <span className="text-gray-500">(töötame E-R)</span>
                 </label>
                 <input
                   type="date"
                   value={selectedDate}
                   min={getTodayDate()}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    if (isWorkingDay(e.target.value)) {
+                      setSelectedDate(e.target.value);
+                    } else {
+                      setMessage("⚠️ Töötame ainult esmaspäevast reedeni!");
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
+                {selectedDate && !isWorkingDay(selectedDate) && (
+                  <p className="text-red-600 text-sm mt-1">⚠️ Valitud kuupäev pole tööpäev. Palun valige E-R.</p>
+                )}
               </div>
 
-              {/* Time Selection */}
-              {selectedDate && area && (
+              {/* Time Selection - Enhanced */}
+              {selectedDate && area && isWorkingDay(selectedDate) && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kellaaeg *
+                    Kellaaeg * <span className="text-gray-500">(30-min intervallidena)</span>
                   </label>
                   {loading ? (
-                    <div className="text-center py-6">
+                    <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
-                      <p className="mt-2 text-gray-600">Laadin saadaolevaid aegu...</p>
+                      <p className="mt-3 text-gray-600">Laadin saadaolevaid aegu...</p>
                     </div>
                   ) : availableTimes.length > 0 ? (
-                    <select
-                      value={selectedTime}
-                      onChange={(e) => setSelectedTime(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    >
-                      <option value="">Vali kellaaeg</option>
-                      {availableTimes.map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-sm text-blue-800">
+                          📅 <strong>{new Date(selectedDate).toLocaleDateString('et-EE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong>
+                        </p>
+                        <p className="text-sm text-blue-600 mt-1">
+                          {availableTimes.length} vaba aega saadaval teie {area}ha pindala jaoks
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        {availableTimes.map((time) => (
+                          <button
+                            key={time}
+                            type="button"
+                            onClick={() => setSelectedTime(time)}
+                            className={`p-3 rounded-lg text-sm font-medium transition-all ${
+                              selectedTime === time
+                                ? "bg-green-600 text-white shadow-lg"
+                                : "bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700"
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      {selectedTime && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <p className="text-sm text-green-800">
+                            ✅ <strong>Valitud aeg:</strong> {selectedTime}
+                          </p>
+                          <p className="text-sm text-green-600">
+                            Töö kestab umbes {priceCalculation?.work_duration_hours.toFixed(1)} tundi
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <div className="text-center py-6 text-red-600 bg-red-50 rounded-lg">
+                    <div className="text-center py-8 text-red-600 bg-red-50 border border-red-200 rounded-lg">
                       <p className="font-medium">⚠️ Valitud kuupäevaks pole sobilikke aegu</p>
-                      <p className="text-sm mt-1">Palun valige teine kuupäev või vähendage pindala suurust</p>
+                      <p className="text-sm mt-2">Palun valige teine kuupäev või vähendage pindala suurust</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Järgmine vaba tööpäev: {getNextWorkingDay()}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -371,9 +429,9 @@ function App() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !selectedTime}
                 className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-colors ${
-                  loading
+                  loading || !selectedTime
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500"
                 }`}

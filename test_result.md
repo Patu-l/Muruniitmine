@@ -203,15 +203,9 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Scheduling algorithm implementation"
-    - "Price calculation API"
-    - "Booking CRUD operations"
-    - "Booking form interface"
-    - "Real-time price calculation"
-    - "Available time slots display"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:

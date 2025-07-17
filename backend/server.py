@@ -622,6 +622,61 @@ async def get_booking_trends():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting booking trends: {str(e)}")
 
+# Reminder and Notification System
+@api_router.get("/reminders/upcoming")
+async def get_upcoming_reminders():
+    """Get upcoming work reminders"""
+    try:
+        # Get tomorrow's date
+        tomorrow = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+        
+        # Get bookings for tomorrow
+        bookings = await get_bookings_for_date(tomorrow)
+        
+        reminders = []
+        for booking in bookings:
+            reminders.append({
+                "booking_id": booking.id,
+                "customer_name": booking.customer_name,
+                "customer_phone": booking.customer_phone,
+                "customer_address": booking.customer_address,
+                "date": booking.date,
+                "time": booking.start_time,
+                "area_hectares": booking.area_hectares,
+                "final_price": booking.final_price,
+                "reminder_type": "next_day"
+            })
+        
+        return reminders
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting reminders: {str(e)}")
+
+@api_router.post("/reminders/send")
+async def send_reminder_notifications():
+    """Send reminder notifications (SMS/Email simulation)"""
+    try:
+        reminders = await get_upcoming_reminders()
+        
+        notifications_sent = []
+        for reminder in reminders:
+            # In a real app, you'd send SMS/Email here
+            # For demo, we'll simulate it
+            notification = {
+                "customer_name": reminder["customer_name"],
+                "customer_phone": reminder["customer_phone"],
+                "message": f"Tere {reminder['customer_name']}! Meeldetuletus: homme {reminder['date']} kell {reminder['time']} toimub muruniitmine aadressil {reminder['customer_address']}. Pindala: {reminder['area_hectares']}ha. Hind: {reminder['final_price']}€.",
+                "sent_at": datetime.now(),
+                "status": "sent"
+            }
+            notifications_sent.append(notification)
+        
+        return {
+            "notifications_sent": len(notifications_sent),
+            "details": notifications_sent
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending reminders: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 

@@ -137,11 +137,22 @@ class BackendTester:
     def test_booking_creation(self):
         """Test booking creation"""
         try:
+            # First check available times to get a valid slot
+            test_date = "2024-12-19"  # Thursday
+            response = requests.get(f"{self.base_url}/available-times/{test_date}", 
+                                  params={"area_hectares": 1.5})
+            
+            available_time = "08:00"  # Default fallback
+            if response.status_code == 200:
+                data = response.json()
+                if data["available_times"]:
+                    available_time = data["available_times"][0]
+            
             booking_data = {
                 "area_hectares": 1.5,
                 "long_grass": False,
-                "date": "2024-12-17",  # Tuesday
-                "time": "10:00",
+                "date": test_date,
+                "time": available_time,
                 "customer_name": "Mart Tamm",
                 "customer_phone": "+372 5123 4567",
                 "customer_address": "Tallinna tn 15, Tartu"

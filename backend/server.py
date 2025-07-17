@@ -381,6 +381,115 @@ async def get_bookings_by_date(date: str):
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
 
+# Service Provider Management Endpoints
+@api_router.post("/providers", response_model=ServiceProvider)
+async def create_service_provider(provider_data: ServiceProviderCreate):
+    """Create a new service provider"""
+    try:
+        provider = ServiceProvider(**provider_data.dict())
+        await db.service_providers.insert_one(provider.dict())
+        return provider
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating provider: {str(e)}")
+
+@api_router.get("/providers", response_model=List[ServiceProvider])
+async def get_all_service_providers():
+    """Get all service providers"""
+    providers = await db.service_providers.find().sort("name", 1).to_list(1000)
+    return [ServiceProvider(**provider) for provider in providers]
+
+@api_router.get("/providers/{provider_id}", response_model=ServiceProvider)
+async def get_service_provider(provider_id: str):
+    """Get a specific service provider"""
+    provider = await db.service_providers.find_one({"id": provider_id})
+    if not provider:
+        raise HTTPException(status_code=404, detail="Service provider not found")
+    return ServiceProvider(**provider)
+
+@api_router.put("/providers/{provider_id}", response_model=ServiceProvider)
+async def update_service_provider(provider_id: str, provider_data: ServiceProviderCreate):
+    """Update a service provider"""
+    provider = await db.service_providers.find_one({"id": provider_id})
+    if not provider:
+        raise HTTPException(status_code=404, detail="Service provider not found")
+    
+    updated_data = provider_data.dict()
+    updated_data["id"] = provider_id
+    updated_data["created_at"] = provider["created_at"]
+    updated_data["total_jobs_completed"] = provider.get("total_jobs_completed", 0)
+    updated_data["average_rating"] = provider.get("average_rating", 5.0)
+    
+    updated_provider = ServiceProvider(**updated_data)
+    await db.service_providers.replace_one({"id": provider_id}, updated_provider.dict())
+    return updated_provider
+
+@api_router.delete("/providers/{provider_id}")
+async def delete_service_provider(provider_id: str):
+    """Delete a service provider"""
+    result = await db.service_providers.delete_one({"id": provider_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Service provider not found")
+    return {"message": "Service provider deleted successfully"}
+
+# Work Assignment Endpoints
+@api_router.post("/assignments", response_model=WorkAssignment)
+async def create_work_assignment(assignment_data: WorkAssignmentCreate):
+    """Create a new work assignment"""
+    try:
+        # Verify booking exists
+        booking = await db.bookings.find_one({"id": assignment_data.booking_id})
+        if not booking:
+            raise HTTPException(status_code=404, detail="Booking not found")
+        
+        # Verify provider exists
+        provider = await db.service_providers.find_one({"id": assignment_data.provider_id})
+        if not provider:
+            raise HTTPException(status_code=404, detail="Service provider not found")
+        
+        assignment = WorkAssignment(**assignment_data.dict())
+        await db.work_assignments.insert_one(assignment.dict())
+        return assignment
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating assignment: {str(e)}")
+
+@api_router.get("/assignments", response_model=List[WorkAssignment])
+async def get_all_work_assignments():
+    """Get all work assignments"""
+    assignments = await db.work_assignments.find().sort("scheduled_date", 1).to_list(1000)
+    return [WorkAssignment(**assignment) for assignment in assignments]
+
+@api_router.get("/assignments/provider/{provider_id}", response_model=List[WorkAssignment])
+async def get_assignments_by_provider(provider_id: str):
+    """Get assignments for a specific provider"""
+    assignments = await db.work_assignments.find({"provider_id": provider_id}).sort("scheduled_date", 1).to_list(1000)
+    return [WorkAssignment(**assignment) for assignment in assignments]
+
+@api_router.get("/assignments/{assignment_id}", response_model=WorkAssignment)
+async def get_work_assignment(assignment_id: str):
+    """Get a specific work assignment"""
+    assignment = await db.work_assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Work assignment not found")
+    return WorkAssignment(**assignment)
+
+@api_router.put("/assignments/{assignment_id}/status")
+async def update_assignment_status(assignment_id: str, status: str, rating: Optional[float] = None, feedback: Optional[str] = None):
+    """Update assignment status"""
+    assignment = await db.work_assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Work assignment not found")
+    
+    update_data = {"status": status}
+    if status == "completed":
+        update_data["completed_at"] = datetime.utcnow()
+        if rating:
+            update_data["rating"] = rating
+        if feedback:
+            update_data["feedback"] = feedback
+    
+    await db.work_assignments.update_one({"id": assignment_id}, {"$set": update_data})
+    return {"message": "Assignment status updated successfully"}
+
 # Include the router in the main app
 app.include_router(api_router)
 

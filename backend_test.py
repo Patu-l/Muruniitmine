@@ -452,10 +452,13 @@ class BackendTester:
         print("-" * 40)
         provider_id = self.test_service_provider_management()
         
-        # Work assignment system
+        # Work assignment system (only if we have both booking and provider)
         print("\n📝 Testing Work Assignment System")
         print("-" * 40)
-        self.test_work_assignments(booking_id, provider_id)
+        if booking_id and provider_id:
+            self.test_work_assignments(booking_id, provider_id)
+        else:
+            self.log_test("Work Assignments", False, "Missing booking_id or provider_id for testing")
         
         # Analytics and reporting
         print("\n📊 Testing Analytics and Reporting")

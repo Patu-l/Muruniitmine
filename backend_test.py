@@ -275,8 +275,8 @@ class BackendTester:
             assignment_data = {
                 "booking_id": booking_id,
                 "provider_id": provider_id,
-                "scheduled_date": "2024-12-17",
-                "scheduled_time": "10:00",
+                "scheduled_date": "2024-12-19",
+                "scheduled_time": "08:00",
                 "estimated_duration": 3.75,
                 "special_instructions": "Tähelepanu: kitsas värav, kasutada väikest masinat"
             }

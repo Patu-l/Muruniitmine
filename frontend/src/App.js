@@ -918,9 +918,110 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
           {providers.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-600">Teenusepakkujaid ei ole veel lisatud.</p>
-              <button className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              <button 
+                onClick={() => setShowProviderModal(true)}
+                className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
                 Lisa esimene teenusepakkuja
               </button>
+            </div>
+          )}
+
+          {providers.length > 0 && (
+            <div className="mt-8 text-center">
+              <button 
+                onClick={() => setShowProviderModal(true)}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Lisa uus teenusepakkuja
+              </button>
+            </div>
+          )}
+
+          {/* Provider Modal */}
+          {showProviderModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Lisa uus teenusepakkuja</h3>
+                
+                <form onSubmit={addProvider} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nimi *</label>
+                    <input
+                      type="text"
+                      value={newProvider.name}
+                      onChange={(e) => setNewProvider({...newProvider, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefon *</label>
+                    <input
+                      type="tel"
+                      value={newProvider.phone}
+                      onChange={(e) => setNewProvider({...newProvider, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input
+                      type="email"
+                      value={newProvider.email}
+                      onChange={(e) => setNewProvider({...newProvider, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tunnitasu (€) *</label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="100"
+                      value={newProvider.hourly_rate}
+                      onChange={(e) => setNewProvider({...newProvider, hourly_rate: parseFloat(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max pindala päevas (ha) *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="50"
+                      value={newProvider.max_area_per_day}
+                      onChange={(e) => setNewProvider({...newProvider, max_area_per_day: parseFloat(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
+                    >
+                      {loading ? "Salvestamine..." : "Salvesta"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowProviderModal(false)}
+                      className="flex-1 py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      Tühista
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>

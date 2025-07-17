@@ -70,6 +70,33 @@ function App() {
     }
   };
 
+  const loadProviders = async () => {
+    try {
+      const response = await axios.get(`${API}/providers`);
+      setProviders(response.data);
+    } catch (error) {
+      console.error("Error loading providers:", error);
+    }
+  };
+
+  const loadAnalytics = async () => {
+    try {
+      const response = await axios.get(`${API}/analytics/dashboard`);
+      setAnalytics(response.data);
+    } catch (error) {
+      console.error("Error loading analytics:", error);
+    }
+  };
+
+  // Load admin data when switching to admin view
+  useEffect(() => {
+    if (currentView === "providers") {
+      loadProviders();
+    } else if (currentView === "analytics") {
+      loadAnalytics();
+    }
+  }, [currentView]);
+
   const handleBooking = async (e) => {
     e.preventDefault();
     

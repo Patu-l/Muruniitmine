@@ -490,6 +490,138 @@ async def update_assignment_status(assignment_id: str, status: str, rating: Opti
     await db.work_assignments.update_one({"id": assignment_id}, {"$set": update_data})
     return {"message": "Assignment status updated successfully"}
 
+# Analytics and Reporting Endpoints
+@api_router.get("/analytics/dashboard")
+async def get_dashboard_analytics():
+    """Get dashboard analytics data"""
+    try:
+        # Get total bookings
+        total_bookings = await db.bookings.count_documents({})
+        
+        # Get total revenue
+        bookings = await db.bookings.find().to_list(1000)
+        total_revenue = sum(booking.get("final_price", 0) for booking in bookings)
+        
+        # Get this month's bookings
+        current_month = datetime.now().strftime('%Y-%m')
+        this_month_bookings = await db.bookings.count_documents({
+            "date": {"$regex": f"^{current_month}"}
+        })
+        
+        # Get active providers
+        active_providers = await db.service_providers.count_documents({"is_active": True})
+        
+        # Get upcoming assignments
+        today = datetime.now().strftime('%Y-%m-%d')
+        upcoming_assignments = await db.work_assignments.count_documents({
+            "scheduled_date": {"$gte": today},
+            "status": "assigned"
+        })
+        
+        # Get completed assignments this month
+        completed_this_month = await db.work_assignments.count_documents({
+            "scheduled_date": {"$regex": f"^{current_month}"},
+            "status": "completed"
+        })
+        
+        return {
+            "total_bookings": total_bookings,
+            "total_revenue": total_revenue,
+            "this_month_bookings": this_month_bookings,
+            "active_providers": active_providers,
+            "upcoming_assignments": upcoming_assignments,
+            "completed_this_month": completed_this_month
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting analytics: {str(e)}")
+
+@api_router.get("/analytics/monthly-revenue")
+async def get_monthly_revenue():
+    """Get monthly revenue analytics"""
+    try:
+        # Get all bookings grouped by month
+        bookings = await db.bookings.find().sort("date", 1).to_list(1000)
+        
+        monthly_revenue = {}
+        for booking in bookings:
+            month = booking["date"][:7]  # YYYY-MM
+            if month not in monthly_revenue:
+                monthly_revenue[month] = 0
+            monthly_revenue[month] += booking.get("final_price", 0)
+        
+        # Convert to list of dictionaries
+        revenue_data = [
+            {"month": month, "revenue": revenue}
+            for month, revenue in sorted(monthly_revenue.items())
+        ]
+        
+        return revenue_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting monthly revenue: {str(e)}")
+
+@api_router.get("/analytics/provider-performance")
+async def get_provider_performance():
+    """Get provider performance analytics"""
+    try:
+        providers = await db.service_providers.find().to_list(1000)
+        performance_data = []
+        
+        for provider in providers:
+            # Get assignments for this provider
+            assignments = await db.work_assignments.find({"provider_id": provider["id"]}).to_list(1000)
+            
+            completed_jobs = len([a for a in assignments if a["status"] == "completed"])
+            total_assignments = len(assignments)
+            
+            # Calculate average rating
+            ratings = [a["rating"] for a in assignments if a.get("rating")]
+            avg_rating = sum(ratings) / len(ratings) if ratings else 0
+            
+            performance_data.append({
+                "provider_id": provider["id"],
+                "name": provider["name"],
+                "total_assignments": total_assignments,
+                "completed_jobs": completed_jobs,
+                "completion_rate": (completed_jobs / total_assignments * 100) if total_assignments > 0 else 0,
+                "average_rating": avg_rating,
+                "hourly_rate": provider["hourly_rate"]
+            })
+        
+        return performance_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting provider performance: {str(e)}")
+
+@api_router.get("/analytics/booking-trends")
+async def get_booking_trends():
+    """Get booking trends by day of week and time"""
+    try:
+        bookings = await db.bookings.find().to_list(1000)
+        
+        day_trends = {}
+        time_trends = {}
+        
+        for booking in bookings:
+            # Day of week analysis
+            date_obj = datetime.strptime(booking["date"], '%Y-%m-%d')
+            day_name = date_obj.strftime('%A')
+            
+            if day_name not in day_trends:
+                day_trends[day_name] = 0
+            day_trends[day_name] += 1
+            
+            # Time analysis
+            hour = int(booking["start_time"].split(':')[0])
+            if hour not in time_trends:
+                time_trends[hour] = 0
+            time_trends[hour] += 1
+        
+        return {
+            "day_trends": day_trends,
+            "time_trends": time_trends
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting booking trends: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 

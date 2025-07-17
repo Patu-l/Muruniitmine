@@ -24,6 +24,18 @@ function App() {
   const [analytics, setAnalytics] = useState(null);
   const [weather, setWeather] = useState(null);
   const [showWeatherAlert, setShowWeatherAlert] = useState(false);
+  const [showProviderModal, setShowProviderModal] = useState(false);
+  const [newProvider, setNewProvider] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    specialization: "general",
+    hourly_rate: 25,
+    max_area_per_day: 10,
+    working_days: [0, 1, 2, 3, 4],
+    start_time: "08:00",
+    end_time: "18:00"
+  });
 
   // Calculate price when area or long grass changes
   useEffect(() => {

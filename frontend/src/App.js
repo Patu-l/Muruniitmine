@@ -178,7 +178,7 @@ function App() {
         <div className="relative container mx-auto px-4 text-center">
           <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl p-8 max-w-4xl mx-auto">
             <h1 className="text-5xl font-bold mb-4 text-shadow-lg">
-              🌿 Muruniitmine
+              Muruniitmine
             </h1>
             <p className="text-xl mb-8 text-shadow-md">
               Kvaliteetne muruniitmisteenus kogu Eestis<br />

@@ -22,6 +22,8 @@ function App() {
   const [currentView, setCurrentView] = useState("booking"); // booking, admin, providers, analytics
   const [providers, setProviders] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [weather, setWeather] = useState(null);
+  const [showWeatherAlert, setShowWeatherAlert] = useState(false);
 
   // Calculate price when area or long grass changes
   useEffect(() => {

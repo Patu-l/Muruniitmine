@@ -190,7 +190,7 @@ class BackendTester:
                 self.log_test("Get All Bookings", False, f"Status: {response.status_code}", response.text)
             
             # Get bookings by date
-            test_date = "2024-12-17"
+            test_date = "2024-12-19"
             response = requests.get(f"{self.base_url}/bookings/{test_date}")
             
             if response.status_code == 200:

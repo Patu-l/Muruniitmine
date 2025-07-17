@@ -721,13 +721,28 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Töö aadress *
                     </label>
-                    <textarea
-                      value={customerAddress}
-                      onChange={(e) => setCustomerAddress(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows="2"
-                      placeholder="Töö toimumise aadress"
-                    />
+                    <div className="flex space-x-2">
+                      <textarea
+                        value={customerAddress}
+                        onChange={(e) => setCustomerAddress(e.target.value)}
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        rows="2"
+                        placeholder="Töö toimumise aadress"
+                      />
+                      {customerAddress && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(customerAddress)}`;
+                            window.open(mapUrl, '_blank');
+                          }}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          title="Ava Google Maps-is"
+                        >
+                          🗺️
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 

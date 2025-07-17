@@ -282,7 +282,7 @@ function App() {
                 <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-green-800 flex items-center">
-                      💰 Hinnakalkulatsioon
+                      <span className="mr-2">💰</span> Hinnakalkulatsioon
                     </h3>
                     <div className="text-2xl font-bold text-green-600">
                       {formatPrice(priceCalculation.final_price)}

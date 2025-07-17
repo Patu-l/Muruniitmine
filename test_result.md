@@ -107,39 +107,48 @@ user_problem_statement: "Estonian lawn mowing service booking system with comple
 backend:
   - task: "Scheduling algorithm implementation"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented complex scheduling algorithm with work duration calculation, logistics time, and time slot availability checking"
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE TESTING PASSED: Scheduling algorithm works correctly. Time slot blocking verified - booked times properly removed from available slots. Large area bookings (4 hectares) correctly block most of day. Work duration formula (area/0.4) + logistics time (1.5h) properly calculated. Available times correctly filtered within 10:00-20:00 work hours. Duplicate booking prevention works. Minor: Error handling returns 500 instead of 400 for validation errors, but core functionality is solid."
   
   - task: "Price calculation API"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented price calculation with base price per hectare and long grass premium"
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE TESTING PASSED: Price calculation API works perfectly. Base price formula (27.19€/hectare) verified for multiple area values. Long grass premium (25% extra) correctly calculated. Work duration formula (area/0.4 hours) accurate. Input validation works for negative/zero areas. All business logic requirements met."
   
   - task: "Booking CRUD operations"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented booking creation, retrieval, and availability checking endpoints"
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE TESTING PASSED: All CRUD operations working correctly. POST /api/bookings creates bookings with proper price/time calculations. GET /api/bookings retrieves all bookings. GET /api/bookings/{date} filters by date. Date/time validation works. End time calculation includes work duration + 1.5h logistics buffer. Booking data persistence verified. Minor: Some validation errors return 500 instead of 400 status codes."
 
 frontend:
   - task: "Booking form interface"

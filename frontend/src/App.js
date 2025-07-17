@@ -348,94 +348,182 @@ function App() {
                 )}
               </div>
 
-              {/* Time Selection and Booking Overview - Enhanced */}
+              {/* Time Selection and Booking Overview - Professional Calendar */}
               {selectedDate && area && isWorkingDay(selectedDate) && (
-                <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kellaaeg * <span className="text-gray-500">(30-min intervallidena)</span>
-                  </label>
-                  
-                  {loading ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
-                      <p className="mt-3 text-gray-600">Laadin saadaolevaid aegu...</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {/* Date Overview */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-sm font-medium text-blue-800">
-                          📅 <strong>{new Date(selectedDate).toLocaleDateString('et-EE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong>
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-4 text-sm text-blue-600">
-                          <span>✅ {availableTimes.length} vaba aega</span>
-                          <span>🔒 {bookedSlots.length} broneeritud aega</span>
-                          <span>📏 Teie pindala: {area}ha</span>
-                        </div>
+                <div className="space-y-6">
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Aja valik</h3>
+                    
+                    {loading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
+                        <p className="mt-3 text-gray-600">Laadin saadaolevaid aegu...</p>
                       </div>
-
-                      {/* Booked Slots Display */}
-                      {bookedSlots.length > 0 && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                          <h4 className="font-medium text-red-800 mb-2">🔒 Broneeritud ajad</h4>
-                          <div className="space-y-2">
-                            {bookedSlots.map((slot, index) => (
-                              <div key={index} className="flex items-center justify-between text-sm">
-                                <span className="font-medium text-red-700">
-                                  {slot.start_time} - {slot.end_time}
-                                </span>
-                                <span className="text-red-600">
-                                  {slot.area_hectares}ha • {slot.customer_name}
-                                </span>
-                              </div>
-                            ))}
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Date Overview */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-slate-800">
+                              {new Date(selectedDate).toLocaleDateString('et-EE', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                              })}
+                            </h4>
+                            <span className="text-sm text-slate-600">
+                              Töö kestus: {priceCalculation?.work_duration_hours.toFixed(1)}h
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+                            <span className="flex items-center">
+                              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                              {availableTimes.length} vaba aega
+                            </span>
+                            <span className="flex items-center">
+                              <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                              {bookedSlots.length} broneeritud
+                            </span>
+                            <span className="flex items-center">
+                              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                              {area}ha pindala
+                            </span>
                           </div>
                         </div>
-                      )}
 
-                      {/* Available Times */}
-                      {availableTimes.length > 0 ? (
-                        <div className="space-y-4">
-                          <h4 className="font-medium text-green-800">✅ Vabad ajad</h4>
-                          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                            {availableTimes.map((time) => (
-                              <button
-                                key={time}
-                                type="button"
-                                onClick={() => setSelectedTime(time)}
-                                className={`p-3 rounded-lg text-sm font-medium transition-all ${
-                                  selectedTime === time
-                                    ? "bg-green-600 text-white shadow-lg"
-                                    : "bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700"
-                                }`}
-                              >
-                                {time}
-                              </button>
-                            ))}
+                        {/* Professional Time Grid */}
+                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 px-4 py-3 border-b">
+                            <h4 className="font-medium text-gray-800">Tööpäeva ajakava (8:00 - 18:00)</h4>
                           </div>
                           
-                          {selectedTime && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                              <p className="text-sm text-green-800">
-                                ✅ <strong>Valitud aeg:</strong> {selectedTime}
-                              </p>
-                              <p className="text-sm text-green-600">
-                                Töö kestab umbes {priceCalculation?.work_duration_hours.toFixed(1)} tundi
-                              </p>
+                          <div className="p-4">
+                            {/* Time slots grid */}
+                            <div className="grid grid-cols-6 gap-2 mb-4">
+                              {/* Generate time slots from 8:00 to 18:00 */}
+                              {Array.from({ length: 20 }, (_, i) => {
+                                const hour = Math.floor(i / 2) + 8;
+                                const minute = (i % 2) * 30;
+                                const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                                
+                                // Check if this time slot is available
+                                const isAvailable = availableTimes.includes(timeSlot);
+                                const isBooked = bookedSlots.some(slot => 
+                                  timeSlot >= slot.start_time && timeSlot < slot.end_time
+                                );
+                                const isSelected = selectedTime === timeSlot;
+                                
+                                let bgColor = 'bg-gray-100';
+                                let textColor = 'text-gray-400';
+                                let cursor = 'cursor-not-allowed';
+                                
+                                if (isBooked) {
+                                  bgColor = 'bg-red-100 border-red-200';
+                                  textColor = 'text-red-700';
+                                } else if (isAvailable) {
+                                  bgColor = 'bg-green-100 hover:bg-green-200 border-green-200';
+                                  textColor = 'text-green-700';
+                                  cursor = 'cursor-pointer';
+                                  
+                                  if (isSelected) {
+                                    bgColor = 'bg-green-600 border-green-600';
+                                    textColor = 'text-white';
+                                  }
+                                }
+                                
+                                return (
+                                  <button
+                                    key={timeSlot}
+                                    type="button"
+                                    disabled={!isAvailable}
+                                    onClick={() => isAvailable && setSelectedTime(timeSlot)}
+                                    className={`
+                                      ${bgColor} ${textColor} ${cursor}
+                                      p-2 rounded-md text-sm font-medium border transition-all
+                                      ${isAvailable ? 'hover:shadow-sm' : ''}
+                                    `}
+                                  >
+                                    {timeSlot}
+                                  </button>
+                                );
+                              })}
                             </div>
-                          )}
+                            
+                            {/* Legend */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 pt-3 border-t">
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-green-100 border border-green-200 rounded mr-2"></div>
+                                <span>Saadaval</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-red-100 border border-red-200 rounded mr-2"></div>
+                                <span>Broneeritud</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-gray-100 border border-gray-200 rounded mr-2"></div>
+                                <span>Pole tööaeg</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-green-600 rounded mr-2"></div>
+                                <span>Valitud</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="text-center py-8 text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                          <p className="font-medium">⚠️ Valitud kuupäevaks pole sobilikke aegu</p>
-                          <p className="text-sm mt-2">Palun valige teine kuupäev või vähendage pindala suurust</p>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Järgmine vaba tööpäev: {getNextWorkingDay()}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+
+                        {/* Booked Slots Details */}
+                        {bookedSlots.length > 0 && (
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <h4 className="font-medium text-red-800 mb-3">Broneeritud ajad sellel päeval</h4>
+                            <div className="space-y-2">
+                              {bookedSlots.map((slot, index) => (
+                                <div key={index} className="flex items-center justify-between p-3 bg-white rounded-md border">
+                                  <div className="flex items-center">
+                                    <div className="w-2 h-2 bg-red-500 rounded-full mr-3"></div>
+                                    <span className="font-medium text-gray-800">
+                                      {slot.start_time} - {slot.end_time}
+                                    </span>
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    {slot.area_hectares}ha • {slot.customer_name}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Selected Time Confirmation */}
+                        {selectedTime && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-green-600 rounded-full mr-3"></div>
+                              <div>
+                                <p className="font-medium text-green-800">
+                                  Valitud aeg: {selectedTime}
+                                </p>
+                                <p className="text-sm text-green-600">
+                                  Töö kestab umbes {priceCalculation?.work_duration_hours.toFixed(1)} tundi
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* No available times message */}
+                        {availableTimes.length === 0 && (
+                          <div className="text-center py-8 text-red-600 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="font-medium">Valitud kuupäevaks pole sobilikke aegu</p>
+                            <p className="text-sm mt-2">Palun valige teine kuupäev või vähendage pindala suurust</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Järgmine vaba tööpäev: {getNextWorkingDay()}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

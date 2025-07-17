@@ -89,7 +89,7 @@ function App() {
 
       const response = await axios.post(`${API}/bookings`, bookingData);
       
-      setMessage(`✅ Broneering edukalt tehtud! Töö ID: ${response.data.id}`);
+      setMessage(`Broneering edukalt tehtud! Töö ID: ${response.data.id}`);
       
       // Reset form
       setArea("");

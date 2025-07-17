@@ -338,7 +338,7 @@ function App() {
                     if (isWorkingDay(e.target.value)) {
                       setSelectedDate(e.target.value);
                     } else {
-                      setMessage("⚠️ Töötame ainult esmaspäevast reedeni!");
+                      setMessage("Töötame ainult esmaspäevast reedeni!");
                     }
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"

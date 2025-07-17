@@ -152,6 +152,10 @@ function App() {
       
       setMessage(`Broneering edukalt tehtud! Töö ID: ${response.data.id}`);
       
+      // Generate calendar link
+      const calendarLink = generateCalendarLink(response.data);
+      setMessage(`Broneering edukalt tehtud! Töö ID: ${response.data.id}. ${calendarLink}`);
+      
       // Reset form
       setArea("");
       setLongGrass(false);
@@ -170,6 +174,22 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateCalendarLink = (booking) => {
+    const startDate = new Date(`${booking.date}T${booking.start_time}:00`);
+    const endDate = new Date(`${booking.date}T${booking.end_time}:00`);
+    
+    const title = `Muruniitmine - ${booking.area_hectares}ha`;
+    const details = `Klient: ${booking.customer_name}
+Telefon: ${booking.customer_phone}
+Aadress: ${booking.customer_address}
+Pindala: ${booking.area_hectares} hektarit
+Lõpphind: ${formatPrice(booking.final_price)}`;
+    
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}&details=${encodeURIComponent(details)}`;
+    
+    return `<a href="${googleCalendarUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">Lisa Google Calendar-isse</a>`;
   };
 
   const formatPrice = (price) => {

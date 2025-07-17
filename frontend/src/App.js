@@ -1050,6 +1050,9 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                     <span className="text-blue-600 font-bold">📊</span>
                   </div>
                 </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  Kõik aegade kohta
+                </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-6">
@@ -1061,6 +1064,9 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                     <span className="text-green-600 font-bold">💰</span>
                   </div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  Kõik aegade kohta
                 </div>
               </div>
 
@@ -1074,6 +1080,9 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                     <span className="text-purple-600 font-bold">📅</span>
                   </div>
                 </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  {new Date().toLocaleDateString('et-EE', { month: 'long', year: 'numeric' })}
+                </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-6">
@@ -1085,6 +1094,9 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                   <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                     <span className="text-orange-600 font-bold">👥</span>
                   </div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  Aktiivsed töötajad
                 </div>
               </div>
 
@@ -1098,6 +1110,9 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                     <span className="text-yellow-600 font-bold">⏰</span>
                   </div>
                 </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  Järgmised 7 päeva
+                </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-6">
@@ -1109,6 +1124,9 @@ Lõpphind: ${formatPrice(booking.final_price)}`;
                   <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
                     <span className="text-teal-600 font-bold">✅</span>
                   </div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  {new Date().toLocaleDateString('et-EE', { month: 'long', year: 'numeric' })}
                 </div>
               </div>
             </div>

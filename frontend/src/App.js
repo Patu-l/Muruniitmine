@@ -213,7 +213,7 @@ function App() {
                   backgroundImage: "url('https://images.unsplash.com/photo-1458245201577-fc8a130b8829')"
                 }}
               ></div>
-              <h3 className="text-xl font-semibold text-green-800 mb-2">🚜 Professionaalne Tehnika</h3>
+              <h3 className="text-xl font-semibold text-green-800 mb-2">Professionaalne Tehnika</h3>
               <p className="text-gray-600">Kasutame kvaliteetset ja hästi hooldatud muruniitmistehnikat</p>
             </div>
             

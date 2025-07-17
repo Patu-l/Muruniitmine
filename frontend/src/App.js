@@ -235,7 +235,7 @@ function App() {
                   backgroundImage: "url('https://images.unsplash.com/photo-1558904541-efa843a96f01')"
                 }}
               ></div>
-              <h3 className="text-xl font-semibold text-green-800 mb-2">✅ Garantiitud Kvaliteet</h3>
+              <h3 className="text-xl font-semibold text-green-800 mb-2">Garantiitud Kvaliteet</h3>
               <p className="text-gray-600">100% rahulolu garantii ja kliendile orienteeritud lähenemine</p>
             </div>
           </div>

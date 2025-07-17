@@ -11,6 +11,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [availableTimes, setAvailableTimes] = useState([]);
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [priceCalculation, setPriceCalculation] = useState(null);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -56,6 +57,7 @@ function App() {
         }
       });
       setAvailableTimes(response.data.available_times);
+      setBookedSlots(response.data.booked_slots);
       setSelectedTime(""); // Reset selected time
     } catch (error) {
       console.error("Error getting available times:", error);
@@ -99,6 +101,7 @@ function App() {
       setCustomerAddress("");
       setPriceCalculation(null);
       setAvailableTimes([]);
+      setBookedSlots([]);
       
     } catch (error) {
       console.error("Error creating booking:", error);
@@ -175,7 +178,7 @@ function App() {
         <div className="relative container mx-auto px-4 text-center">
           <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl p-8 max-w-4xl mx-auto">
             <h1 className="text-5xl font-bold mb-4 text-shadow-lg">
-              🌿 Professionaalne Muruniitmine
+              🌿 Muruniitmine
             </h1>
             <p className="text-xl mb-8 text-shadow-md">
               Kvaliteetne muruniitmisteenus kogu Eestis<br />
@@ -274,22 +277,49 @@ function App() {
                 </label>
               </div>
 
-              {/* Price Calculation Display */}
+              {/* Price Calculation Display - Enhanced */}
               {priceCalculation && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                  <h3 className="font-semibold text-green-800 mb-3 flex items-center">
-                    💰 Hinnakalkulatsioon
-                  </h3>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="font-medium">Koguhind: <span className="text-green-600 text-lg">{formatPrice(priceCalculation.final_price)}</span></p>
-                      <p>Töö kestus: <span className="font-medium">{priceCalculation.work_duration_hours.toFixed(1)} tundi</span></p>
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-green-800 flex items-center">
+                      💰 Hinnakalkulatsioon
+                    </h3>
+                    <div className="text-2xl font-bold text-green-600">
+                      {formatPrice(priceCalculation.final_price)}
                     </div>
-                    <div>
-                      <p>Põhihind: {formatPrice(priceCalculation.base_price)}</p>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span className="text-gray-600">Pindala:</span>
+                        <span className="font-medium">{priceCalculation.area_hectares} ha</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span className="text-gray-600">Põhihind:</span>
+                        <span className="font-medium">{formatPrice(priceCalculation.base_price)}</span>
+                      </div>
                       {priceCalculation.long_grass_premium > 0 && (
-                        <p>Pika rohi lisatasu: {formatPrice(priceCalculation.long_grass_premium)}</p>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                          <span className="text-gray-600">Pika rohi lisatasu:</span>
+                          <span className="font-medium text-orange-600">+{formatPrice(priceCalculation.long_grass_premium)}</span>
+                        </div>
                       )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span className="text-gray-600">Töö kestus:</span>
+                        <span className="font-medium">{priceCalculation.work_duration_hours.toFixed(1)} h</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span className="text-gray-600">Tööhind/ha:</span>
+                        <span className="font-medium">27,19€</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 text-lg font-bold text-green-800">
+                        <span>Kokku:</span>
+                        <span>{formatPrice(priceCalculation.final_price)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -318,63 +348,92 @@ function App() {
                 )}
               </div>
 
-              {/* Time Selection - Enhanced */}
+              {/* Time Selection and Booking Overview - Enhanced */}
               {selectedDate && area && isWorkingDay(selectedDate) && (
-                <div>
+                <div className="space-y-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Kellaaeg * <span className="text-gray-500">(30-min intervallidena)</span>
                   </label>
+                  
                   {loading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
                       <p className="mt-3 text-gray-600">Laadin saadaolevaid aegu...</p>
                     </div>
-                  ) : availableTimes.length > 0 ? (
-                    <div className="space-y-4">
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Date Overview */}
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-sm text-blue-800">
+                        <p className="text-sm font-medium text-blue-800">
                           📅 <strong>{new Date(selectedDate).toLocaleDateString('et-EE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong>
                         </p>
-                        <p className="text-sm text-blue-600 mt-1">
-                          {availableTimes.length} vaba aega saadaval teie {area}ha pindala jaoks
-                        </p>
+                        <div className="mt-2 flex flex-wrap gap-4 text-sm text-blue-600">
+                          <span>✅ {availableTimes.length} vaba aega</span>
+                          <span>🔒 {bookedSlots.length} broneeritud aega</span>
+                          <span>📏 Teie pindala: {area}ha</span>
+                        </div>
                       </div>
-                      
-                      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                        {availableTimes.map((time) => (
-                          <button
-                            key={time}
-                            type="button"
-                            onClick={() => setSelectedTime(time)}
-                            className={`p-3 rounded-lg text-sm font-medium transition-all ${
-                              selectedTime === time
-                                ? "bg-green-600 text-white shadow-lg"
-                                : "bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700"
-                            }`}
-                          >
-                            {time}
-                          </button>
-                        ))}
-                      </div>
-                      
-                      {selectedTime && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <p className="text-sm text-green-800">
-                            ✅ <strong>Valitud aeg:</strong> {selectedTime}
-                          </p>
-                          <p className="text-sm text-green-600">
-                            Töö kestab umbes {priceCalculation?.work_duration_hours.toFixed(1)} tundi
+
+                      {/* Booked Slots Display */}
+                      {bookedSlots.length > 0 && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <h4 className="font-medium text-red-800 mb-2">🔒 Broneeritud ajad</h4>
+                          <div className="space-y-2">
+                            {bookedSlots.map((slot, index) => (
+                              <div key={index} className="flex items-center justify-between text-sm">
+                                <span className="font-medium text-red-700">
+                                  {slot.start_time} - {slot.end_time}
+                                </span>
+                                <span className="text-red-600">
+                                  {slot.area_hectares}ha • {slot.customer_name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Available Times */}
+                      {availableTimes.length > 0 ? (
+                        <div className="space-y-4">
+                          <h4 className="font-medium text-green-800">✅ Vabad ajad</h4>
+                          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                            {availableTimes.map((time) => (
+                              <button
+                                key={time}
+                                type="button"
+                                onClick={() => setSelectedTime(time)}
+                                className={`p-3 rounded-lg text-sm font-medium transition-all ${
+                                  selectedTime === time
+                                    ? "bg-green-600 text-white shadow-lg"
+                                    : "bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700"
+                                }`}
+                              >
+                                {time}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          {selectedTime && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <p className="text-sm text-green-800">
+                                ✅ <strong>Valitud aeg:</strong> {selectedTime}
+                              </p>
+                              <p className="text-sm text-green-600">
+                                Töö kestab umbes {priceCalculation?.work_duration_hours.toFixed(1)} tundi
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-red-600 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="font-medium">⚠️ Valitud kuupäevaks pole sobilikke aegu</p>
+                          <p className="text-sm mt-2">Palun valige teine kuupäev või vähendage pindala suurust</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Järgmine vaba tööpäev: {getNextWorkingDay()}
                           </p>
                         </div>
                       )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="font-medium">⚠️ Valitud kuupäevaks pole sobilikke aegu</p>
-                      <p className="text-sm mt-2">Palun valige teine kuupäev või vähendage pindala suurust</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Järgmine vaba tööpäev: {getNextWorkingDay()}
-                      </p>
                     </div>
                   )}
                 </div>

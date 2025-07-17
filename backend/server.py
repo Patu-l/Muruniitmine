@@ -62,9 +62,16 @@ class PriceCalculation(BaseModel):
     final_price: float
     long_grass_premium: float
 
+class BookedSlot(BaseModel):
+    start_time: str
+    end_time: str
+    customer_name: str
+    area_hectares: float
+
 class AvailableTimesResponse(BaseModel):
     date: str
     available_times: List[str]
+    booked_slots: List[BookedSlot]
     earliest_time: Optional[str]
 
 # Configuration - WORKING DAYS: Monday to Friday
@@ -140,11 +147,22 @@ async def calculate_available_times(date: str, area_hectares: float = 1.0) -> Av
         return AvailableTimesResponse(
             date=date,
             available_times=[],
+            booked_slots=[],
             earliest_time=None
         )
     
     # Get existing bookings for the date
     bookings = await get_bookings_for_date(date)
+    
+    # Create booked slots info
+    booked_slots = []
+    for booking in bookings:
+        booked_slots.append(BookedSlot(
+            start_time=booking.start_time,
+            end_time=booking.end_time,
+            customer_name=booking.customer_name,
+            area_hectares=booking.area_hectares
+        ))
     
     # Calculate work duration for the requested area
     work_duration = calculate_work_duration(area_hectares)
@@ -206,6 +224,7 @@ async def calculate_available_times(date: str, area_hectares: float = 1.0) -> Av
     return AvailableTimesResponse(
         date=date,
         available_times=available_times,
+        booked_slots=booked_slots,
         earliest_time=earliest_time
     )
 

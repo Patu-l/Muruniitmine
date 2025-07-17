@@ -105,7 +105,7 @@ function App() {
       
     } catch (error) {
       console.error("Error creating booking:", error);
-      setMessage(`❌ Viga broneeringu tegemisel: ${error.response?.data?.detail || error.message}`);
+      setMessage(`Viga broneeringu tegemisel: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
     }

@@ -93,6 +93,33 @@ function App() {
     }
   };
 
+  const addProvider = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      await axios.post(`${API}/providers`, newProvider);
+      setShowProviderModal(false);
+      setNewProvider({
+        name: "",
+        phone: "",
+        email: "",
+        specialization: "general",
+        hourly_rate: 25,
+        max_area_per_day: 10,
+        working_days: [0, 1, 2, 3, 4],
+        start_time: "08:00",
+        end_time: "18:00"
+      });
+      loadProviders();
+      setMessage("Teenusepakkuja edukalt lisatud!");
+    } catch (error) {
+      console.error("Error adding provider:", error);
+      setMessage("Viga teenusepakkuja lisamisel");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadAnalytics = async () => {
     try {
       const response = await axios.get(`${API}/analytics/dashboard`);

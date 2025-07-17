@@ -74,6 +74,58 @@ class AvailableTimesResponse(BaseModel):
     booked_slots: List[BookedSlot]
     earliest_time: Optional[str]
 
+# Service Provider Models
+class ServiceProviderCreate(BaseModel):
+    name: str = Field(..., min_length=1)
+    phone: str = Field(..., min_length=1)
+    email: str = Field(..., min_length=1)
+    specialization: str = Field(default="general")  # general, large_areas, precision, etc.
+    hourly_rate: float = Field(..., gt=0)
+    max_area_per_day: float = Field(default=10.0)
+    working_days: List[int] = Field(default=[0, 1, 2, 3, 4])  # Monday to Friday
+    start_time: str = Field(default="08:00")
+    end_time: str = Field(default="18:00")
+    is_active: bool = Field(default=True)
+
+class ServiceProvider(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    phone: str
+    email: str
+    specialization: str
+    hourly_rate: float
+    max_area_per_day: float
+    working_days: List[int]
+    start_time: str
+    end_time: str
+    is_active: bool
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    total_jobs_completed: int = Field(default=0)
+    average_rating: float = Field(default=5.0)
+
+# Work Assignment Models
+class WorkAssignmentCreate(BaseModel):
+    booking_id: str
+    provider_id: str
+    scheduled_date: str
+    scheduled_time: str
+    estimated_duration: float
+    special_instructions: Optional[str] = None
+
+class WorkAssignment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    booking_id: str
+    provider_id: str
+    scheduled_date: str
+    scheduled_time: str
+    estimated_duration: float
+    special_instructions: Optional[str]
+    status: str = Field(default="assigned")  # assigned, in_progress, completed, cancelled
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+    rating: Optional[float] = None
+    feedback: Optional[str] = None
+
 # Configuration - WORKING DAYS: Monday to Friday
 BASE_PRICE_PER_HECTARE = 27.19  # Base price per hectare
 WORK_RATE = 0.4  # hectares per hour

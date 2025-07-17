@@ -90,6 +90,35 @@ function App() {
     }
   };
 
+  const checkWeather = async () => {
+    try {
+      // For demo purposes, we'll simulate weather data
+      // In production, you'd use a real weather API like OpenWeatherMap
+      const weatherConditions = [
+        { condition: "sunny", description: "Päikesepaisteline", suitable: true },
+        { condition: "cloudy", description: "Pilves", suitable: true },
+        { condition: "light_rain", description: "Kerge vihm", suitable: false },
+        { condition: "heavy_rain", description: "Tugev vihm", suitable: false },
+        { condition: "storm", description: "Torm", suitable: false }
+      ];
+      
+      // Simulate random weather for demo
+      const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+      setWeather(randomWeather);
+      
+      if (!randomWeather.suitable) {
+        setShowWeatherAlert(true);
+      }
+    } catch (error) {
+      console.error("Error checking weather:", error);
+    }
+  };
+
+  // Check weather when component mounts
+  useEffect(() => {
+    checkWeather();
+  }, []);
+
   // Load admin data when switching to admin view
   useEffect(() => {
     if (currentView === "providers") {

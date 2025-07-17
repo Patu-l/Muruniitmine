@@ -19,6 +19,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showFAQ, setShowFAQ] = useState(false);
+  const [currentView, setCurrentView] = useState("booking"); // booking, admin, providers, analytics
+  const [providers, setProviders] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
 
   // Calculate price when area or long grass changes
   useEffect(() => {

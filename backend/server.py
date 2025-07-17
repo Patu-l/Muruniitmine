@@ -62,12 +62,12 @@ class AvailableTimesResponse(BaseModel):
     available_times: List[str]
     earliest_time: Optional[str]
 
-# Configuration
+# Configuration - UPDATED WORKING HOURS
 BASE_PRICE_PER_HECTARE = 27.19  # Base price per hectare
 WORK_RATE = 0.4  # hectares per hour
 LOGISTICS_TIME = 1.5  # hours between jobs
-WORKDAY_START = time(10, 0)  # 10:00 AM
-WORKDAY_END = time(20, 0)  # 8:00 PM
+WORKDAY_START = time(8, 0)  # 8:00 AM
+WORKDAY_END = time(18, 0)  # 6:00 PM
 LONG_GRASS_PREMIUM = 0.25  # 25% extra for long grass
 
 def calculate_work_duration(area_hectares: float) -> float:
@@ -104,19 +104,39 @@ def minutes_to_time(minutes: int) -> str:
     mins = minutes % 60
     return f"{hours:02d}:{mins:02d}"
 
+def calculate_latest_start_time(work_duration_hours: float) -> str:
+    """Calculate the latest possible start time for a job to finish by 18:00"""
+    workday_end_minutes = time_to_minutes("18:00")
+    total_job_time_minutes = int(work_duration_hours * 60)  # Only work time, no logistics needed for last job
+    latest_start_minutes = workday_end_minutes - total_job_time_minutes
+    
+    # Ensure it's not before workday start
+    workday_start_minutes = time_to_minutes("08:00")
+    if latest_start_minutes < workday_start_minutes:
+        latest_start_minutes = workday_start_minutes
+    
+    return minutes_to_time(latest_start_minutes)
+
 async def get_bookings_for_date(date: str) -> List[Booking]:
     """Get all bookings for a specific date"""
     bookings = await db.bookings.find({"date": date}).sort("start_time", 1).to_list(1000)
     return [Booking(**booking) for booking in bookings]
 
-async def calculate_available_times(date: str) -> AvailableTimesResponse:
-    """Calculate available time slots for a given date"""
+async def calculate_available_times(date: str, area_hectares: float = 1.0) -> AvailableTimesResponse:
+    """Calculate available time slots for a given date and area"""
     # Get existing bookings for the date
     bookings = await get_bookings_for_date(date)
     
+    # Calculate work duration for the requested area
+    work_duration = calculate_work_duration(area_hectares)
+    
+    # Calculate latest possible start time
+    latest_start = calculate_latest_start_time(work_duration)
+    latest_start_minutes = time_to_minutes(latest_start)
+    
     # Start with workday beginning
-    workday_start_minutes = time_to_minutes("10:00")
-    workday_end_minutes = time_to_minutes("20:00")
+    workday_start_minutes = time_to_minutes("08:00")
+    workday_end_minutes = time_to_minutes("18:00")
     
     # Track occupied time slots
     occupied_slots = []
@@ -135,8 +155,10 @@ async def calculate_available_times(date: str) -> AvailableTimesResponse:
     
     for start, end in occupied_slots:
         # Add times before this booking
-        while current_time < start:
-            if current_time + 60 <= workday_end_minutes:  # At least 1 hour slots
+        while current_time < start and current_time <= latest_start_minutes:
+            # Check if there's enough time for the job
+            job_end_time = current_time + int(work_duration * 60)
+            if job_end_time <= workday_end_minutes:
                 available_times.append(minutes_to_time(current_time))
             current_time += 30  # 30-minute intervals
         
@@ -144,22 +166,23 @@ async def calculate_available_times(date: str) -> AvailableTimesResponse:
         current_time = max(current_time, end)
     
     # Add remaining times after last booking
-    while current_time < workday_end_minutes:
-        if current_time + 60 <= workday_end_minutes:
+    while current_time <= latest_start_minutes:
+        job_end_time = current_time + int(work_duration * 60)
+        if job_end_time <= workday_end_minutes:
             available_times.append(minutes_to_time(current_time))
         current_time += 30
     
-    # If no times available, find earliest time
+    # Find earliest time
     earliest_time = None
-    if not available_times and occupied_slots:
+    if available_times:
+        earliest_time = available_times[0]
+    elif not occupied_slots:
+        earliest_time = "08:00"
+    else:
         # Find the earliest time after all bookings
         last_end = max(end for _, end in occupied_slots)
-        if last_end < workday_end_minutes:
+        if last_end <= latest_start_minutes:
             earliest_time = minutes_to_time(last_end)
-    elif available_times:
-        earliest_time = available_times[0]
-    else:
-        earliest_time = "10:00"
     
     return AvailableTimesResponse(
         date=date,
@@ -176,12 +199,12 @@ async def calculate_job_price(area_hectares: float, long_grass: bool = False):
     return calculate_price(area_hectares, long_grass)
 
 @api_router.get("/available-times/{date}", response_model=AvailableTimesResponse)
-async def get_available_times(date: str):
-    """Get available time slots for a specific date"""
+async def get_available_times(date: str, area_hectares: float = 1.0):
+    """Get available time slots for a specific date and area"""
     try:
         # Validate date format
         datetime.strptime(date, '%Y-%m-%d')
-        return await calculate_available_times(date)
+        return await calculate_available_times(date, area_hectares)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
 
@@ -195,16 +218,22 @@ async def create_booking(booking_data: BookingCreate):
         # Validate time format
         time_obj = datetime.strptime(booking_data.time, '%H:%M').time()
         
-        # Check if time is within work hours
-        if time_obj < WORKDAY_START or time_obj > WORKDAY_END:
-            raise HTTPException(status_code=400, detail="Time must be between 10:00 and 20:00")
+        # Check if time is within work hours and allows job completion
+        work_duration = calculate_work_duration(booking_data.area_hectares)
+        latest_start = calculate_latest_start_time(work_duration)
+        
+        if time_obj < WORKDAY_START or booking_data.time > latest_start:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Time must be between 08:00 and {latest_start} for {booking_data.area_hectares}ha area"
+            )
         
         # Check if the requested time is available
-        available_times = await calculate_available_times(booking_data.date)
+        available_times = await calculate_available_times(booking_data.date, booking_data.area_hectares)
         if booking_data.time not in available_times.available_times:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Time {booking_data.time} is not available. Available times: {available_times.available_times}"
+                detail=f"Time {booking_data.time} is not available for {booking_data.area_hectares}ha. Available times: {available_times.available_times}"
             )
         
         # Calculate pricing and duration

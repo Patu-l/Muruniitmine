@@ -224,7 +224,7 @@ function App() {
                   backgroundImage: "url('https://images.unsplash.com/photo-1501520158826-76df880863a3')"
                 }}
               ></div>
-              <h3 className="text-xl font-semibold text-green-800 mb-2">⚡ Kiire Teenindus</h3>
+              <h3 className="text-xl font-semibold text-green-800 mb-2">Kiire Teenindus</h3>
               <p className="text-gray-600">Efektiivsed töövõtted ja punktuaalne teenindus</p>
             </div>
             
